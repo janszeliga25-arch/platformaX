@@ -33,8 +33,8 @@ public class OrgRegistrationService {
 
     @Transactional
     public OrgRegistrationResult registerOrganizationWithAdmin(String orgName, String krs,
-                                                               String adminEmail, String adminPassword) {
-        String normalized = EmailNormalizer.normalize(adminEmail);
+                                                               String email, String password) {
+        String normalized = EmailNormalizer.normalize(email);
         try {
             emailRegistryRepository.saveAndFlush(new EmailRegistry(normalized, Instant.now()));
         } catch (DataIntegrityViolationException e) {
@@ -47,7 +47,7 @@ public class OrgRegistrationService {
             throw new KrsAlreadyUsedException();
         }
         OrgAccount account = orgAccountRepository.save(
-                new OrgAccount(org, normalized, passwordEncoder.encode(adminPassword), OrgRole.ORG_ADMIN));
+                new OrgAccount(org, normalized, passwordEncoder.encode(password), OrgRole.ORG_ADMIN));
         return new OrgRegistrationResult(org.getId(), account.getId());
     }
 }

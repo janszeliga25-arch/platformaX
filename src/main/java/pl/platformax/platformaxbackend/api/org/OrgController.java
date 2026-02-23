@@ -25,8 +25,8 @@ public class OrgController {
     @ResponseStatus(HttpStatus.CREATED)
     public OrgRegisterResponse register(@RequestBody @Valid OrgRegisterRequest request) {
         OrgRegistrationService.OrgRegistrationResult result = orgRegistrationService
-                .registerOrganizationWithAdmin(request.orgName(), request.krs(),
-                        request.adminEmail(), request.adminPassword());
+                .registerOrganizationWithAdmin(request.organizationName(), request.krs(),
+                        request.email(), request.password());
         return new OrgRegisterResponse(result.orgId(), result.accountId());
     }
 }
