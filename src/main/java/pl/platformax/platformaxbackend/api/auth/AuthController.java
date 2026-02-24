@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import pl.platformax.platformaxbackend.api.auth.dto.LoginRequest;
+import pl.platformax.platformaxbackend.api.auth.dto.TokenResponse;
 import pl.platformax.platformaxbackend.api.auth.dto.UserRegisterRequest;
 import pl.platformax.platformaxbackend.api.auth.dto.UserRegisterResponse;
+import pl.platformax.platformaxbackend.domain.account.UserLoginService;
 import pl.platformax.platformaxbackend.domain.account.UserRegistrationService;
 
 @RestController
@@ -16,9 +19,12 @@ import pl.platformax.platformaxbackend.domain.account.UserRegistrationService;
 public class AuthController {
 
     private final UserRegistrationService userRegistrationService;
+    private final UserLoginService userLoginService;
 
-    public AuthController(UserRegistrationService userRegistrationService) {
+    public AuthController(UserRegistrationService userRegistrationService,
+                          UserLoginService userLoginService) {
         this.userRegistrationService = userRegistrationService;
+        this.userLoginService = userLoginService;
     }
 
     @PostMapping("/register")
@@ -26,5 +32,11 @@ public class AuthController {
     public UserRegisterResponse register(@RequestBody @Valid UserRegisterRequest request) {
         Long accountId = userRegistrationService.registerUser(request.email(), request.password());
         return new UserRegisterResponse(accountId);
+    }
+
+    @PostMapping("/login")
+    public TokenResponse login(@RequestBody @Valid LoginRequest request) {
+        String token = userLoginService.login(request.email(), request.password());
+        return new TokenResponse(token);
     }
 }

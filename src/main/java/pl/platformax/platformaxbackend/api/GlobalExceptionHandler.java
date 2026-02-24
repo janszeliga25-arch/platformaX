@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pl.platformax.platformaxbackend.domain.account.EmailAlreadyUsedException;
+import pl.platformax.platformaxbackend.domain.account.InvalidCredentialsException;
 import pl.platformax.platformaxbackend.domain.account.KrsAlreadyUsedException;
 
 @RestControllerAdvice
@@ -28,6 +29,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleKrsAlreadyUsed(KrsAlreadyUsedException e) {
         log.warn("KRS already used: {}", e.getMessage());
         return new ErrorResponse("KRS_ALREADY_USED");
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidCredentials(InvalidCredentialsException e) {
+        log.warn("Invalid credentials: {}", e.getMessage());
+        return new ErrorResponse("INVALID_CREDENTIALS");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

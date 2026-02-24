@@ -4,21 +4,37 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.platformax.platformaxbackend.security.jwt.JwtAuthFilter;
+import pl.platformax.platformaxbackend.security.jwt.JwtService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtService jwtService;
+
+    public SecurityConfig(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // MVP Commit 2: CSRF disabled and all requests permitted (stateless REST API, no session cookies).
-        // Authentication/authorization will be added in a later commit.
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/register", "/api/auth/login",
+                                "/api/org/register", "/api/org/login",
+                                "/h2-console/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .headers(headers -> headers.frameOptions(fo -> fo.sameOrigin()));
         return http.build();
     }
 
