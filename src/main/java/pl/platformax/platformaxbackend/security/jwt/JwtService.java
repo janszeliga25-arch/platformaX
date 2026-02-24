@@ -18,11 +18,17 @@ public class JwtService {
 
     public JwtService(JwtProperties properties) {
         this.properties = properties;
+        String secret = properties.getSecret();
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                    "security.jwt.secret must be at least 32 bytes; got: " +
+                    (secret == null ? "null" : secret.length() + " chars"));
+        }
     }
 
     public String generateToken(Long accountId, AccountType accountType, List<String> roles, Long orgId) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + properties.getExpirationSeconds() * 1000L);
+        Date expiry = new Date(now.getTime() + properties.getTtlMinutes() * 60 * 1000L);
 
         var builder = Jwts.builder()
                 .subject(String.valueOf(accountId))

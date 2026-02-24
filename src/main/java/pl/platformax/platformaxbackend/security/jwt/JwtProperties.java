@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class JwtProperties {
 
     private String secret;
-    private long expirationSeconds = 86400;
+    private long ttlMinutes = 60;
 
     public String getSecret() {
         return secret;
@@ -18,11 +18,11 @@ public class JwtProperties {
         this.secret = secret;
     }
 
-    public long getExpirationSeconds() {
-        return expirationSeconds;
+    public long getTtlMinutes() {
+        return ttlMinutes;
     }
 
-    public void setExpirationSeconds(long expirationSeconds) {
-        this.expirationSeconds = expirationSeconds;
+    public void setTtlMinutes(long ttlMinutes) {
+        this.ttlMinutes = ttlMinutes;
     }
 }

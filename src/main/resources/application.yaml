@@ -25,7 +25,7 @@ security:
   jwt:
     # Override with a strong random secret via SECURITY_JWT_SECRET env var in production
     secret: "changeme-at-least-32-characters-long-secret-key-here"
-    expiration-seconds: 86400
+    ttlMinutes: 60
 
 logging:
   level:

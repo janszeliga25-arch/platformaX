@@ -100,7 +100,7 @@ class LoginControllerTest {
                                 "\"email\":\"orglogin@example.com\",\"password\":\"password123\"}"))
                 .andExpect(status().isCreated());
 
-        MvcResult result = mockMvc.perform(post("/api/org/login")
+        MvcResult result = mockMvc.perform(post("/api/org/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"orglogin@example.com\",\"password\":\"password123\"}"))
                 .andExpect(status().isOk())
