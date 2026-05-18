@@ -61,7 +61,7 @@ class AccountTypeAccessControlTest {
     void userToken_canAccess_userEndpoint() throws Exception {
         mockMvc.perform(get("/api/user/me")
                         .header("Authorization", "Bearer " + userToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -76,7 +76,7 @@ class AccountTypeAccessControlTest {
     void orgToken_canAccess_orgEndpoint() throws Exception {
         mockMvc.perform(get("/api/org/me")
                         .header("Authorization", "Bearer " + orgToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

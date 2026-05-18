@@ -32,6 +32,7 @@ public class OrgController {
     }
 
     @GetMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void me() {
     }
 }
