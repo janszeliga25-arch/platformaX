@@ -10,6 +10,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.platformax.platformaxbackend.domain.account.AccountType;
+import pl.platformax.platformaxbackend.security.AccountTypeAuthorizationManager;
+import pl.platformax.platformaxbackend.security.RestAccessDeniedHandler;
 import pl.platformax.platformaxbackend.security.RestAuthenticationEntryPoint;
 import pl.platformax.platformaxbackend.security.jwt.JwtAuthFilter;
 import pl.platformax.platformaxbackend.security.jwt.JwtService;
@@ -20,10 +23,14 @@ public class SecurityConfig {
 
     private final JwtService jwtService;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
+    private final RestAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(JwtService jwtService, RestAuthenticationEntryPoint authenticationEntryPoint) {
+    public SecurityConfig(JwtService jwtService,
+                          RestAuthenticationEntryPoint authenticationEntryPoint,
+                          RestAccessDeniedHandler accessDeniedHandler) {
         this.jwtService = jwtService;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -37,8 +44,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/org/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/org/auth/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/user/**").access(new AccountTypeAuthorizationManager(AccountType.USER))
+                        .requestMatchers("/api/org/**").access(new AccountTypeAuthorizationManager(AccountType.ORG))
                         .anyRequest().authenticated())
-                .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint))
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(fo -> fo.sameOrigin()));
         return http.build();
