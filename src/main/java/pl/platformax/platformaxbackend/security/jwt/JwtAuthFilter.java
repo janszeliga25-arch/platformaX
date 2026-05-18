@@ -12,6 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pl.platformax.platformaxbackend.domain.account.AccountType;
+import pl.platformax.platformaxbackend.security.AuthenticatedAccount;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,13 +37,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             try {
                 Claims claims = jwtService.parseToken(token);
+
+                Long accountId = ((Number) claims.get("accountId")).longValue();
+                AccountType accountType = AccountType.valueOf(claims.get("accountType", String.class));
                 List<?> rawRoles = claims.get("roles", List.class);
-                List<SimpleGrantedAuthority> authorities = rawRoles == null ? List.of() :
-                        rawRoles.stream()
-                                .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
-                                .toList();
+                List<String> roles = rawRoles == null ? List.of() :
+                        rawRoles.stream().map(Object::toString).toList();
+                Number rawOrgId = (Number) claims.get("orgId");
+                Long orgId = rawOrgId != null ? rawOrgId.longValue() : null;
+
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
+                        .toList();
+
+                AuthenticatedAccount principal = new AuthenticatedAccount(accountId, accountType, roles, orgId);
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
+                        new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (JwtException e) {
                 log.debug("Invalid JWT token: {}", e.getMessage());
