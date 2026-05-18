@@ -38,8 +38,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.parseToken(token);
 
-                Long accountId = ((Number) claims.get("accountId")).longValue();
-                AccountType accountType = AccountType.valueOf(claims.get("accountType", String.class));
+                Object rawAccountId = claims.get("accountId");
+                String rawAccountType = claims.get("accountType", String.class);
+                if (rawAccountId == null || rawAccountType == null) {
+                    log.debug("JWT token missing required claims");
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                Long accountId = ((Number) rawAccountId).longValue();
+                AccountType accountType = AccountType.valueOf(rawAccountType);
                 List<?> rawRoles = claims.get("roles", List.class);
                 List<String> roles = rawRoles == null ? List.of() :
                         rawRoles.stream().map(Object::toString).toList();
@@ -54,7 +62,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (JwtException e) {
+            } catch (JwtException | IllegalArgumentException | ClassCastException e) {
                 log.debug("Invalid JWT token: {}", e.getMessage());
             }
         }
