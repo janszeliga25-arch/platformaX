@@ -1,4 +1,4 @@
-package pl.platformax.platformaxbackend.api.user;
+package pl.platformax.platformaxbackend.security.testcontroller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/user")
-public class UserController {
+public class UserTestController {
 
     @GetMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)

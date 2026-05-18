@@ -2,7 +2,6 @@ package pl.platformax.platformaxbackend.api.org;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,10 +28,5 @@ public class OrgController {
                 .registerOrganizationWithAdmin(request.organizationName(), request.krs(),
                         request.email(), request.password());
         return new OrgRegisterResponse(result.orgId(), result.accountId());
-    }
-
-    @GetMapping("/me")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void me() {
     }
 }
