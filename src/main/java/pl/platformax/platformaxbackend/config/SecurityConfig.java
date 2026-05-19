@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/user/**").access(new AccountTypeAuthorizationManager(AccountType.USER))
                         .requestMatchers("/api/org/**").access(new AccountTypeAuthorizationManager(AccountType.ORG))
+                        .requestMatchers("/api/admin/**").access(new AccountTypeAuthorizationManager(AccountType.PLATFORM_ADMIN))
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(authenticationEntryPoint)

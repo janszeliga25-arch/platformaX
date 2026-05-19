@@ -24,6 +24,9 @@ public class Organization {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column
+    private LocalDateTime verifiedAt;
+
     protected Organization() {
         // wymagane przez JPA (Hibernate)
     }
@@ -40,8 +43,12 @@ public class Organization {
     public String getKrs() { return krs; }
     public OrganizationStatus getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getVerifiedAt() { return verifiedAt; }
 
     public void verify() {
         this.status = OrganizationStatus.VERIFIED;
+        if (this.verifiedAt == null) {
+            this.verifiedAt = LocalDateTime.now();
+        }
     }
 }
