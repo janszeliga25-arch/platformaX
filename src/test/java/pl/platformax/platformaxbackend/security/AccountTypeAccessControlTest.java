@@ -29,11 +29,13 @@ class AccountTypeAccessControlTest {
 
     private String userToken;
     private String orgToken;
+    private String platformAdminToken;
 
     @BeforeEach
     void setUp() {
         userToken = jwtService.generateToken(1L, AccountType.USER, List.of("USER"), null);
         orgToken = jwtService.generateToken(2L, AccountType.ORG, List.of("ORG_ADMIN"), 10L);
+        platformAdminToken = jwtService.generateToken(3L, AccountType.PLATFORM_ADMIN, List.of(), null);
     }
 
     @Test
@@ -85,5 +87,28 @@ class AccountTypeAccessControlTest {
                         .header("Authorization", "Bearer " + orgToken))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+    }
+
+    @Test
+    void userToken_cannotAccess_adminEndpoint_returns403() throws Exception {
+        mockMvc.perform(get("/api/admin/ping")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+    }
+
+    @Test
+    void orgToken_cannotAccess_adminEndpoint_returns403() throws Exception {
+        mockMvc.perform(get("/api/admin/ping")
+                        .header("Authorization", "Bearer " + orgToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+    }
+
+    @Test
+    void platformAdminToken_canAccess_adminEndpoint() throws Exception {
+        mockMvc.perform(get("/api/admin/ping")
+                        .header("Authorization", "Bearer " + platformAdminToken))
+                .andExpect(status().isNoContent());
     }
 }
