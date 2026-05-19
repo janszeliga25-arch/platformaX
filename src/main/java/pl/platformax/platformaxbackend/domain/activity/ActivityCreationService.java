@@ -50,10 +50,7 @@ public class ActivityCreationService {
             throw new OrganizationNotVerifiedException(organizationId);
         }
 
-        Activity activity = new Activity(organizationId, title, description, activityType, startDateTime);
-        if (endDateTime != null) {
-            activity.setEndDateTime(endDateTime);
-        }
+        Activity activity = new Activity(organizationId, title, description, activityType, startDateTime, endDateTime);
         return activityRepository.save(activity);
     }
 }

@@ -57,12 +57,32 @@ public class Activity {
     }
 
     public Activity(Long organizationId, String title, String description,
-                    ActivityType activityType, LocalDateTime startDateTime) {
+                    ActivityType activityType, LocalDateTime startDateTime,
+                    LocalDateTime endDateTime) {
+        if (organizationId == null) {
+            throw new IllegalArgumentException("organizationId must not be null");
+        }
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("title must not be blank");
+        }
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("description must not be blank");
+        }
+        if (activityType == null) {
+            throw new IllegalArgumentException("activityType must not be null");
+        }
+        if (startDateTime == null) {
+            throw new IllegalArgumentException("startDateTime must not be null");
+        }
+        if (endDateTime != null && !endDateTime.isAfter(startDateTime)) {
+            throw new IllegalArgumentException("endDateTime must be after startDateTime");
+        }
         this.organizationId = organizationId;
         this.title = title;
         this.description = description;
         this.activityType = activityType;
         this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
         this.status = ActivityStatus.DRAFT;
         this.online = false;
         this.createdAt = LocalDateTime.now();
@@ -83,36 +103,6 @@ public class Activity {
     public Integer getMaxParticipants() { return maxParticipants; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-
-    public void setTitle(String title) {
-        this.title = title;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setStatus(ActivityStatus status) {
-        this.status = status;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setStartDateTime(LocalDateTime startDateTime) {
-        this.startDateTime = startDateTime;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setEndDateTime(LocalDateTime endDateTime) {
-        this.endDateTime = endDateTime;
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
