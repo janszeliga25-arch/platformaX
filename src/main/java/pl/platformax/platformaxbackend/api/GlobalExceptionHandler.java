@@ -8,9 +8,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import pl.platformax.platformaxbackend.api.org.activity.MissingOrganizationContextException;
 import pl.platformax.platformaxbackend.domain.account.EmailAlreadyUsedException;
 import pl.platformax.platformaxbackend.domain.account.InvalidCredentialsException;
 import pl.platformax.platformaxbackend.domain.account.KrsAlreadyUsedException;
+import pl.platformax.platformaxbackend.domain.activity.OrganizationNotVerifiedException;
+import pl.platformax.platformaxbackend.domain.org.OrganizationNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -50,5 +53,26 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleNotReadable(HttpMessageNotReadableException e) {
         log.warn("Unreadable request: {}", e.getMessage());
         return new ErrorResponse("VALIDATION_ERROR");
+    }
+
+    @ExceptionHandler(OrganizationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleOrganizationNotFound(OrganizationNotFoundException e) {
+        log.warn("Organization not found: {}", e.getMessage());
+        return new ErrorResponse("ORGANIZATION_NOT_FOUND");
+    }
+
+    @ExceptionHandler(OrganizationNotVerifiedException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleOrganizationNotVerified(OrganizationNotVerifiedException e) {
+        log.warn("Organization not verified: {}", e.getMessage());
+        return new ErrorResponse("ORGANIZATION_NOT_VERIFIED");
+    }
+
+    @ExceptionHandler(MissingOrganizationContextException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleMissingOrganizationContext(MissingOrganizationContextException e) {
+        log.error("Missing organization context: {}", e.getMessage());
+        return new ErrorResponse("ORG_CONTEXT_MISSING");
     }
 }
