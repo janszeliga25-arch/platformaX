@@ -137,4 +137,37 @@ class ActivityCreationServiceTest {
                 activityCreationService.createActivity(
                         org.getId(), "Title", "Desc", ActivityType.TRAINING, START, START));
     }
+
+    @Test
+    void publishActivity_draftStatus_changesStatusToPublished() {
+        Organization org = saveVerifiedOrg("VerifiedOrg9", "1234500000");
+        Activity created = activityCreationService.createActivity(
+                org.getId(), "Publish me", "Desc", ActivityType.TRAINING, START, null);
+
+        Activity published = activityCreationService.publishActivity(org.getId(), created.getId());
+
+        assertEquals(ActivityStatus.PUBLISHED, published.getStatus());
+    }
+
+    @Test
+    void publishActivity_activityFromAnotherOrganization_throwsNotFound() {
+        Organization owner = saveVerifiedOrg("VerifiedOrg10", "1234500001");
+        Organization another = saveVerifiedOrg("VerifiedOrg11", "1234500002");
+        Activity created = activityCreationService.createActivity(
+                owner.getId(), "Owner activity", "Desc", ActivityType.TRAINING, START, null);
+
+        assertThrows(ActivityNotFoundException.class, () ->
+                activityCreationService.publishActivity(another.getId(), created.getId()));
+    }
+
+    @Test
+    void publishActivity_whenAlreadyPublished_throwsCannotBePublished() {
+        Organization org = saveVerifiedOrg("VerifiedOrg12", "1234500003");
+        Activity created = activityCreationService.createActivity(
+                org.getId(), "Publish once", "Desc", ActivityType.TRAINING, START, null);
+        activityCreationService.publishActivity(org.getId(), created.getId());
+
+        assertThrows(ActivityCannotBePublishedException.class, () ->
+                activityCreationService.publishActivity(org.getId(), created.getId()));
+    }
 }

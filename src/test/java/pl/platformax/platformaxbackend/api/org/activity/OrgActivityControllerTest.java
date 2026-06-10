@@ -92,6 +92,16 @@ class OrgActivityControllerTest {
         return objectMapper.readValue(loginBody, TokenResponse.class).token();
     }
 
+    private long createActivityAndGetId(String token) throws Exception {
+        MvcResult createResult = mockMvc.perform(post("/api/org/activities")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
+    }
+
     // ── test cases ────────────────────────────────────────────────────────────
 
     @Test
@@ -365,5 +375,49 @@ class OrgActivityControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void publishActivity_ownedDraft_returns200AndPublishedStatus() throws Exception {
+        String token = registerVerifyAndGetOrgToken(
+                "OrgO", "0000000015", "orgO@example.com", "password123");
+        long activityId = createActivityAndGetId(token);
+
+        mockMvc.perform(post("/api/org/activities/" + activityId + "/publish")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(activityId))
+                .andExpect(jsonPath("$.status").value("PUBLISHED"));
+    }
+
+    @Test
+    void publishActivity_activityFromAnotherOrganization_returns404() throws Exception {
+        String ownerToken = registerVerifyAndGetOrgToken(
+                "OrgP", "0000000016", "orgP@example.com", "password123");
+        long activityId = createActivityAndGetId(ownerToken);
+
+        String anotherOrgToken = registerVerifyAndGetOrgToken(
+                "OrgQ", "0000000017", "orgQ@example.com", "password123");
+
+        mockMvc.perform(post("/api/org/activities/" + activityId + "/publish")
+                        .header("Authorization", "Bearer " + anotherOrgToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("ACTIVITY_NOT_FOUND"));
+    }
+
+    @Test
+    void publishActivity_whenAlreadyPublished_returns422() throws Exception {
+        String token = registerVerifyAndGetOrgToken(
+                "OrgR", "0000000018", "orgR@example.com", "password123");
+        long activityId = createActivityAndGetId(token);
+
+        mockMvc.perform(post("/api/org/activities/" + activityId + "/publish")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/org/activities/" + activityId + "/publish")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error").value("ACTIVITY_CANNOT_BE_PUBLISHED"));
     }
 }
