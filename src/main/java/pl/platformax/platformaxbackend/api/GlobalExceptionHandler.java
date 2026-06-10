@@ -12,6 +12,8 @@ import pl.platformax.platformaxbackend.api.org.activity.MissingOrganizationConte
 import pl.platformax.platformaxbackend.domain.account.EmailAlreadyUsedException;
 import pl.platformax.platformaxbackend.domain.account.InvalidCredentialsException;
 import pl.platformax.platformaxbackend.domain.account.KrsAlreadyUsedException;
+import pl.platformax.platformaxbackend.domain.activity.ActivityCannotBePublishedException;
+import pl.platformax.platformaxbackend.domain.activity.ActivityNotFoundException;
 import pl.platformax.platformaxbackend.domain.activity.OrganizationNotVerifiedException;
 import pl.platformax.platformaxbackend.domain.org.OrganizationNotFoundException;
 
@@ -67,6 +69,20 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleOrganizationNotVerified(OrganizationNotVerifiedException e) {
         log.warn("Organization not verified: {}", e.getMessage());
         return new ErrorResponse("ORGANIZATION_NOT_VERIFIED");
+    }
+
+    @ExceptionHandler(ActivityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleActivityNotFound(ActivityNotFoundException e) {
+        log.warn("Activity not found: {}", e.getMessage());
+        return new ErrorResponse("ACTIVITY_NOT_FOUND");
+    }
+
+    @ExceptionHandler(ActivityCannotBePublishedException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleActivityCannotBePublished(ActivityCannotBePublishedException e) {
+        log.warn("Activity cannot be published: {}", e.getMessage());
+        return new ErrorResponse("ACTIVITY_CANNOT_BE_PUBLISHED");
     }
 
     @ExceptionHandler(MissingOrganizationContextException.class)

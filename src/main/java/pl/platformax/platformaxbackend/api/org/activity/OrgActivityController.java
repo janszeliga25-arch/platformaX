@@ -3,6 +3,7 @@ package pl.platformax.platformaxbackend.api.org.activity;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +42,18 @@ public class OrgActivityController {
                 request.startDateTime(),
                 request.endDateTime()
         );
+        return CreateActivityResponse.from(activity);
+    }
+
+    @PostMapping("/{activityId}/publish")
+    public CreateActivityResponse publish(
+            @PathVariable Long activityId,
+            @AuthenticationPrincipal AuthenticatedAccount principal) {
+        Long orgId = principal.orgId();
+        if (orgId == null) {
+            throw new MissingOrganizationContextException();
+        }
+        Activity activity = activityCreationService.publishActivity(orgId, activityId);
         return CreateActivityResponse.from(activity);
     }
 }

@@ -53,4 +53,20 @@ public class ActivityCreationService {
         Activity activity = new Activity(organizationId, title, description, activityType, startDateTime, endDateTime);
         return activityRepository.save(activity);
     }
+
+    @Transactional
+    public Activity publishActivity(Long organizationId, Long activityId) {
+        if (organizationId == null) {
+            throw new IllegalArgumentException("organizationId must not be null");
+        }
+        if (activityId == null) {
+            throw new IllegalArgumentException("activityId must not be null");
+        }
+
+        Activity activity = activityRepository.findByIdAndOrganizationId(activityId, organizationId)
+                .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+        activity.publish();
+        return activityRepository.save(activity);
+    }
 }

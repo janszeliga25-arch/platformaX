@@ -123,4 +123,12 @@ public class Activity {
         this.maxParticipants = maxParticipants;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void publish() {
+        if (this.status != ActivityStatus.DRAFT) {
+            throw new ActivityCannotBePublishedException(this.id, this.status);
+        }
+        this.status = ActivityStatus.PUBLISHED;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
